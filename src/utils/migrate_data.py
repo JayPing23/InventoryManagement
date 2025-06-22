@@ -14,7 +14,7 @@ from pathlib import Path
 # Add the current directory to Python path to import inventory_manager
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from inventory_manager import InventoryManager
+from src.managers.inventory_manager import InventoryManager
 
 def migrate_data():
     """Migrate data from old format files to the unified system."""

@@ -385,6 +385,10 @@ class InventoryApp:
         clear_button = UIUtils.create_styled_button(item_frame, "🗑️ Clear All", self.clear_entries, 'secondary')
         clear_button.pack(pady=5)
 
+        # Export for POS button
+        export_button = UIUtils.create_styled_button(item_frame, "Export for POS", self.export_for_pos, 'primary')
+        export_button.pack(pady=5)
+
     def add_item(self):
         """Adds a new item to the inventory."""
         name = self.name_entry.get().strip()
@@ -613,6 +617,28 @@ class InventoryApp:
     def on_double_click(self, event):
         """Handles double-click events on the inventory table."""
         self.edit_selected_item()
+
+    def export_for_pos(self):
+        file_path = filedialog.asksaveasfilename(
+            title="Export for POS",
+            defaultextension=".txt",
+            filetypes=[("Text Files", "*.txt")],
+            initialdir="datas/"
+        )
+        if not file_path:
+            return
+        try:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                for p in self.inventory_manager.get_all_products():
+                    # Use product_id or generate one if missing
+                    pid = p.product_id or f"prod_{hash(p.name) % 10000}"
+                    name = p.name or "Unknown"
+                    price = p.price if hasattr(p, 'price') else 0.0
+                    stock = p.quantity if hasattr(p, 'quantity') else 0
+                    f.write(f"{pid}|{name}|{price}|{stock}\n")
+            messagebox.showinfo("Export Complete", f"Exported products for POS import to:\n{file_path}")
+        except Exception as e:
+            messagebox.showerror("Export Error", f"Failed to export: {e}")
 
 
 def main():

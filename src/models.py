@@ -1,8 +1,9 @@
 class Product:
     """
     Represents a product in the inventory system.
+    All fields are optional and default to empty or zero values for flexibility.
     """
-    def __init__(self, product_id: str, name: str, category: str, quantity: int, price: float, description: str = ""):
+    def __init__(self, product_id: str = "", name: str = "", category: str = "", quantity: int = 0, price: float = 0.0, description: str = ""):
         self.product_id = product_id
         self.name = name
         self.category = category
@@ -23,7 +24,7 @@ class Product:
 
     @staticmethod
     def from_dict(data: dict):
-        """Create a Product instance from a dictionary."""
+        """Create a Product instance from a dictionary, allowing missing fields."""
         return Product(
             product_id=data.get("product_id", ""),
             name=data.get("name", ""),

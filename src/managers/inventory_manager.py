@@ -1,7 +1,7 @@
 import json
 import csv
 from typing import List, Optional
-from ..models import Product
+from src.models import Product
 import os
 
 class InventoryManager:
@@ -98,4 +98,7 @@ class InventoryManager:
             return True
         except Exception as e:
             print(f"Error exporting to CSV: {e}")
-            return False 
+            return False
+
+    def get_all_products(self) -> List[Product]:
+        return self.products 

@@ -1,0 +1,2 @@
+# Requirements for Inventory Management System
+matplotlib>=3.8.0 
