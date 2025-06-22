@@ -12,9 +12,11 @@ class InventoryManager:
         self.products: List[Product] = []
 
     def add_product(self, product: Product) -> None:
+        """Add a product to inventory. Product must include description."""
         self.products.append(product)
 
     def edit_product(self, product_id: str, **kwargs) -> bool:
+        """Edit a product by ID. Supports updating description."""
         for product in self.products:
             if product.product_id == product_id:
                 for key, value in kwargs.items():

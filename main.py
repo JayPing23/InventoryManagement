@@ -102,9 +102,16 @@ class EditItemDialog:
         self.category_combo.grid(row=3, column=1, padx=(15, 0), pady=8, sticky=tk.W)
         self.category_combo.set(self.item_data['category']) # Pre-fill
 
+        # Description
+        description_label = ttk.Label(main_frame, text="Description:")
+        description_label.grid(row=4, column=0, sticky=tk.W, pady=8)
+        self.description_entry = ttk.Entry(main_frame, width=35)
+        self.description_entry.grid(row=4, column=1, padx=(15, 0), pady=8, sticky=tk.W)
+        self.description_entry.insert(0, self.item_data.get('description', ''))
+
         # --- Action Buttons ---
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=4, column=0, columnspan=2, pady=(30, 0))
+        button_frame.grid(row=5, column=0, columnspan=2, pady=(30, 0))
 
         save_button = UIUtils.create_styled_button(button_frame, "💾 Save Changes", self.save_changes, 'success')
         save_button.pack(side=tk.LEFT, padx=(0, 15))
@@ -122,6 +129,7 @@ class EditItemDialog:
         name = self.name_entry.get().strip()
         quantity_str = self.quantity_entry.get().strip()
         category = self.category_combo.get()
+        description = self.description_entry.get().strip()
         
         # Basic validation.
         if not name or not quantity_str or not category:
@@ -137,7 +145,7 @@ class EditItemDialog:
             return
             
         # If validation passes, store the result.
-        self.result = {'name': name, 'quantity': quantity, 'category': category}
+        self.result = {'name': name, 'quantity': quantity, 'category': category, 'description': description}
         self.dialog.destroy() # Close the dialog.
         
     def cancel(self):
@@ -242,152 +250,94 @@ class InventoryApp:
                        font=('Segoe UI', 9, 'bold'))
 
     def create_widgets(self):
-        """Creates and arranges all the main widgets in the application."""
-        # Main container frame
-        main_frame = ttk.Frame(self.root, style='light.TFrame')
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Main vertical layout
+        main_frame = ttk.Frame(self.root, style='light.TFrame', padding=5)
+        main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Header with title and stats
-        header_frame = ttk.Frame(main_frame, style='Card.TFrame')
-        header_frame.pack(fill=tk.X, pady=(0, 20))
+        # --- Compact summary label at the top ---
+        self.summary_label = ttk.Label(main_frame, text="", style='TLabel', font=("Segoe UI", 9))
+        self.summary_label.pack(fill=tk.X, padx=5, pady=(0, 2))
 
-        title_label = UIUtils.create_styled_label(header_frame, "📦 Inventory Management System", 'title')
-        title_label.pack(pady=20)
-
-        # Stats frame
-        stats_frame = ttk.Frame(header_frame)
-        stats_frame.pack(fill=tk.X, padx=20, pady=(0, 20))
-
-        self.total_items_label = UIUtils.create_styled_label(stats_frame, "Total Items: 0")
-        self.total_items_label.pack(side=tk.LEFT, padx=(0, 20))
-
-        self.total_value_label = UIUtils.create_styled_label(stats_frame, "Total Value: $0.00")
-        self.total_value_label.pack(side=tk.LEFT)
-
-        # Notebook for tabs
+        # --- Notebook for tabs ---
         self.notebook = ttk.Notebook(main_frame)
         self.notebook.pack(fill=tk.BOTH, expand=True)
-
-        # Create tabs
         self.create_add_tab(self.notebook)
         self.create_search_tab(self.notebook)
         self.create_actions_tab(self.notebook)
 
-        # Main inventory table
+        # --- Inventory Table (main content, below tabs) ---
         table_frame = ttk.Frame(main_frame, style='Card.TFrame')
-        table_frame.pack(fill=tk.BOTH, expand=True, pady=(20, 0))
-
-        table_header = UIUtils.create_styled_label(table_frame, "📋 Inventory Items", 'subtitle')
-        table_header.pack(pady=10)
-
-        # Create treeview
-        columns = ('ID', 'Name', 'Category', 'Quantity', 'Price', 'Total Value', 'Last Updated')
-        self.tree = UIUtils.create_styled_treeview(table_frame, columns, height=15)
-        
-        # Add scrollbar
-        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
-        self.tree.configure(yscrollcommand=scrollbar.set)
-        
-        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
-
-        # Bind double-click event
+        table_frame.pack(fill=tk.BOTH, expand=True, pady=(2, 0))
+        columns = ("ID", "Name", "Category", "Quantity", "Price", "Description")
+        self.tree = ttk.Treeview(table_frame, columns=columns, show='headings', height=18)
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100 if col != "Description" else 180, anchor='center')
+        self.tree.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
         self.tree.bind('<Double-1>', self.on_double_click)
-
-        # Update the table
         self.update_table()
 
     def create_add_tab(self, notebook):
-        """Creates the 'Add Item' tab with input fields and controls."""
-        add_frame = ttk.Frame(notebook, style='Card.TFrame')
+        add_frame = ttk.Frame(notebook, style='Card.TFrame', padding=5)
         notebook.add(add_frame, text="➕ Add Item")
-
-        # Input fields
         input_frame = ttk.Frame(add_frame)
-        input_frame.pack(pady=20)
-
-        # Name field
-        UIUtils.create_styled_label(input_frame, "Name:").grid(row=0, column=0, sticky=tk.W, pady=5)
-        self.name_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter item name", width=30)
-        self.name_entry.grid(row=0, column=1, padx=(10, 0), pady=5, sticky=tk.W)
-
-        # Quantity field
-        UIUtils.create_styled_label(input_frame, "Quantity:").grid(row=1, column=0, sticky=tk.W, pady=5)
-        self.quantity_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter quantity", width=15)
-        self.quantity_entry.grid(row=1, column=1, padx=(10, 0), pady=5, sticky=tk.W)
-
-        # Price field
-        UIUtils.create_styled_label(input_frame, "Price:").grid(row=2, column=0, sticky=tk.W, pady=5)
-        self.price_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter price", width=15)
-        self.price_entry.grid(row=2, column=1, padx=(10, 0), pady=5, sticky=tk.W)
-
-        # Category field
-        UIUtils.create_styled_label(input_frame, "Category:").grid(row=3, column=0, sticky=tk.W, pady=5)
-        self.category_combo = ttk.Combobox(input_frame, values=self.categories, width=27, state="readonly", font=("Segoe UI", 10))
-        self.category_combo.grid(row=3, column=1, padx=(10, 0), pady=5, sticky=tk.W)
-
-        # Add button
-        add_button = UIUtils.create_styled_button(add_frame, "➕ Add Item", self.add_item, 'success')
-        add_button.pack(pady=20)
+        input_frame.pack(pady=5)
+        UIUtils.create_styled_label(input_frame, "Name:").grid(row=0, column=0, sticky=tk.W, pady=2)
+        self.name_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter item name", width=20)
+        self.name_entry.grid(row=0, column=1, padx=(5, 0), pady=2, sticky=tk.W)
+        UIUtils.create_styled_label(input_frame, "Quantity:").grid(row=1, column=0, sticky=tk.W, pady=2)
+        self.quantity_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter quantity", width=10)
+        self.quantity_entry.grid(row=1, column=1, padx=(5, 0), pady=2, sticky=tk.W)
+        UIUtils.create_styled_label(input_frame, "Price:").grid(row=2, column=0, sticky=tk.W, pady=2)
+        self.price_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter price", width=10)
+        self.price_entry.grid(row=2, column=1, padx=(5, 0), pady=2, sticky=tk.W)
+        UIUtils.create_styled_label(input_frame, "Category:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        self.category_combo = ttk.Combobox(input_frame, values=self.categories, width=18, state="readonly", font=("Segoe UI", 9))
+        self.category_combo.grid(row=3, column=1, padx=(5, 0), pady=2, sticky=tk.W)
+        # Add description label and entry
+        description_label = ttk.Label(input_frame, text="Description:")
+        description_label.grid(row=4, column=0, padx=5, pady=5, sticky='e')
+        self.description_entry = ttk.Entry(input_frame)
+        self.description_entry.grid(row=4, column=1, padx=5, pady=5, sticky='w')
+        add_button = UIUtils.create_styled_button(add_frame, "Add Item", self.add_item, 'success')
+        add_button.pack(pady=5)
 
     def create_search_tab(self, notebook):
-        """Creates the 'Search & Filter' tab with search controls."""
-        search_frame = ttk.Frame(notebook, style='Card.TFrame')
+        search_frame = ttk.Frame(notebook, style='Card.TFrame', padding=5)
         notebook.add(search_frame, text="🔍 Search & Filter")
-
-        # Search controls
         search_controls = ttk.Frame(search_frame)
-        search_controls.pack(pady=20)
-
-        UIUtils.create_styled_label(search_controls, "Search:").grid(row=0, column=0, sticky=tk.W, pady=5)
-        self.search_entry = UIUtils.create_styled_entry(search_controls, placeholder="Search items...", width=25)
-        self.search_entry.grid(row=0, column=1, padx=(10, 10), pady=5, sticky=tk.W)
+        search_controls.pack(pady=5)
+        UIUtils.create_styled_label(search_controls, "Search:").grid(row=0, column=0, sticky=tk.W, pady=2)
+        self.search_entry = UIUtils.create_styled_entry(search_controls, placeholder="Search items...", width=18)
+        self.search_entry.grid(row=0, column=1, padx=(5, 5), pady=2, sticky=tk.W)
         self.search_entry.bind('<KeyRelease>', self.filter_items)
-
-        UIUtils.create_styled_label(search_controls, "Category:").grid(row=0, column=2, sticky=tk.W, pady=5)
-        self.filter_category = ttk.Combobox(search_controls, values=['All'] + self.categories, width=20, state="readonly", font=("Segoe UI", 10))
-        self.filter_category.grid(row=0, column=3, padx=(10, 0), pady=5, sticky=tk.W)
+        UIUtils.create_styled_label(search_controls, "Category:").grid(row=0, column=2, sticky=tk.W, pady=2)
+        self.filter_category = ttk.Combobox(search_controls, values=['All'] + self.categories, width=15, state="readonly", font=("Segoe UI", 9))
+        self.filter_category.grid(row=0, column=3, padx=(5, 0), pady=2, sticky=tk.W)
         self.filter_category.set('All')
         self.filter_category.bind('<<ComboboxSelected>>', self.filter_items)
-
-        # Clear filters button
-        clear_button = UIUtils.create_styled_button(search_frame, "🗑️ Clear Filters", self.clear_filters, 'secondary')
-        clear_button.pack(pady=10)
-
-    def create_actions_tab(self, notebook):
-        """Creates the 'Actions' tab with file operations and other actions."""
-        actions_frame = ttk.Frame(notebook, style='Card.TFrame')
-        notebook.add(actions_frame, text="⚙️ Actions")
-
-        # File operations
-        file_frame = ttk.Frame(actions_frame)
-        file_frame.pack(pady=20)
-
-        save_button = UIUtils.create_styled_button(file_frame, "💾 Save", self.save_inventory, 'primary')
-        save_button.pack(pady=5)
-
-        save_as_button = UIUtils.create_styled_button(file_frame, "💾 Save As", self.save_inventory_as, 'secondary')
-        save_as_button.pack(pady=5)
-
-        load_button = UIUtils.create_styled_button(file_frame, "📂 Load", self.load_inventory, 'primary')
-        load_button.pack(pady=5)
-
-        # Item operations
-        item_frame = ttk.Frame(actions_frame)
-        item_frame.pack(pady=20)
-
-        edit_button = UIUtils.create_styled_button(item_frame, "✏️ Edit Selected", self.edit_selected_item, 'warning')
-        edit_button.pack(pady=5)
-
-        delete_button = UIUtils.create_styled_button(item_frame, "🗑️ Delete Selected", self.delete_item, 'danger')
-        delete_button.pack(pady=5)
-
-        clear_button = UIUtils.create_styled_button(item_frame, "🗑️ Clear All", self.clear_entries, 'secondary')
+        clear_button = UIUtils.create_styled_button(search_frame, "Clear Filters", self.clear_filters, 'secondary')
         clear_button.pack(pady=5)
 
-        # Export for POS button
-        export_button = UIUtils.create_styled_button(item_frame, "Export for POS", self.export_for_pos, 'primary')
-        export_button.pack(pady=5)
+    def create_actions_tab(self, notebook):
+        actions_frame = ttk.Frame(notebook, style='Card.TFrame', padding=5)
+        notebook.add(actions_frame, text="⚙️ Actions")
+        file_frame = ttk.Frame(actions_frame)
+        file_frame.pack(pady=5)
+        save_button = UIUtils.create_styled_button(file_frame, "Save", self.save_inventory, 'primary')
+        save_button.pack(side=tk.LEFT, padx=2, pady=2)
+        load_button = UIUtils.create_styled_button(file_frame, "Load", self.load_inventory, 'secondary')
+        load_button.pack(side=tk.LEFT, padx=2, pady=2)
+        export_button = UIUtils.create_styled_button(file_frame, "Export for POS", self.export_for_pos, 'primary')
+        export_button.pack(side=tk.LEFT, padx=2, pady=2)
+        item_frame = ttk.Frame(actions_frame)
+        item_frame.pack(pady=5)
+        edit_button = UIUtils.create_styled_button(item_frame, "Edit Selected", self.edit_selected_item, 'primary')
+        edit_button.pack(side=tk.LEFT, padx=2, pady=2)
+        delete_button = UIUtils.create_styled_button(item_frame, "Delete Selected", self.delete_item, 'danger')
+        delete_button.pack(side=tk.LEFT, padx=2, pady=2)
+        clear_button = UIUtils.create_styled_button(item_frame, "Clear All", self.clear_entries, 'secondary')
+        clear_button.pack(side=tk.LEFT, padx=2, pady=2)
 
     def add_item(self):
         """Adds a new item to the inventory."""
@@ -395,6 +345,7 @@ class InventoryApp:
         quantity_str = self.quantity_entry.get().strip()
         price_str = self.price_entry.get().strip()
         category = self.category_combo.get()
+        description = self.description_entry.get().strip()
 
         # Validation
         if not name or not quantity_str or not price_str or not category:
@@ -415,7 +366,8 @@ class InventoryApp:
             name=name,
             category=category,
             price=price,
-            quantity=quantity
+            quantity=quantity,
+            description=description
         )
 
         # Add to inventory manager
@@ -429,32 +381,14 @@ class InventoryApp:
 
     def update_table(self):
         """Updates the inventory table with current data."""
-        # Clear existing items
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        # Get products from inventory manager
-        products = self.inventory_manager.get_all_products()
-        
-        # Add items to table
-        for product in products:
-            total_value = product.price * product.quantity
-            self.tree.insert('', 'end', values=(
-                product.id,
-                product.name,
-                product.category,
-                product.quantity,
-                UIUtils.format_currency(product.price),
-                UIUtils.format_currency(total_value),
-                UIUtils.format_date(product.last_updated)
-            ))
-
-        # Update stats
-        total_items = len(products)
-        total_value = sum(p.price * p.quantity for p in products)
-        
-        self.total_items_label.config(text=f"Total Items: {total_items}")
-        self.total_value_label.config(text=f"Total Value: {UIUtils.format_currency(total_value)}")
+        self.tree.delete(*self.tree.get_children())
+        total_items = 0
+        total_value = 0.0
+        for p in self.inventory_manager.get_all_products():
+            total_items += 1
+            total_value += (p.price or 0.0) * (p.quantity or 0)
+            self.tree.insert('', 'end', values=(p.product_id, p.name, p.category, p.quantity, p.price, p.description))
+        self.summary_label.config(text=f"Total Items: {total_items} | Total Value: ${total_value:.2f}")
 
     def filter_items(self, event=None):
         """Filters the inventory table based on search criteria."""
@@ -484,13 +418,13 @@ class InventoryApp:
         for product in filtered_products:
             total_value = product.price * product.quantity
             self.tree.insert('', 'end', values=(
-                product.id,
+                product.product_id,
                 product.name,
                 product.category,
                 product.quantity,
                 UIUtils.format_currency(product.price),
                 UIUtils.format_currency(total_value),
-                UIUtils.format_date(product.last_updated)
+                UIUtils.format_date(getattr(product, 'last_updated', ''))
             ))
 
     def clear_filters(self):
@@ -505,6 +439,7 @@ class InventoryApp:
         self.quantity_entry.delete(0, tk.END)
         self.price_entry.delete(0, tk.END)
         self.category_combo.set('')
+        self.description_entry.delete(0, tk.END)
 
     def save_inventory(self):
         """Saves the current inventory to the current file."""
@@ -560,7 +495,7 @@ class InventoryApp:
         
         if product:
             return {
-                'id': product.id,
+                'id': product.product_id,
                 'name': product.name,
                 'category': product.category,
                 'quantity': product.quantity,
@@ -582,11 +517,12 @@ class InventoryApp:
         if dialog.result:
             # Update the product
             product = Product(
-                id=item_id,
+                product_id=item_id,
                 name=dialog.result['name'],
                 category=dialog.result['category'],
                 price=item_data['price'],
-                quantity=dialog.result['quantity']
+                quantity=dialog.result['quantity'],
+                description=dialog.result.get('description', '')
             )
             
             success = self.inventory_manager.update_product(product)

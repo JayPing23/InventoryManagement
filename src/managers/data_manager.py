@@ -137,15 +137,15 @@ class DataManager:
             return []
     
     def save_txt(self, data: List[Dict[str, Any]], filename: str, delimiter: str = '|') -> bool:
-        """Save data to TXT format (pipe-delimited)."""
+        """Save data to TXT format (pipe-delimited). Description is always included."""
         try:
             filepath = self.base_path / filename
             if not data:
                 return False
-            
             with open(filepath, 'w', encoding='utf-8') as f:
                 for item in data:
-                    line = delimiter.join(str(value) for value in item.values())
+                    # Ensure description is present
+                    line = delimiter.join(str(item.get(key, '')) for key in ['product_id', 'name', 'category', 'quantity', 'price', 'description'])
                     f.write(line + '\n')
             return True
         except Exception as e:
@@ -153,24 +153,25 @@ class DataManager:
             return False
     
     def load_txt(self, filename: str, delimiter: str = '|', headers: List[str] = None) -> List[Dict[str, Any]]:
-        """Load data from TXT format (pipe-delimited)."""
+        """Load data from TXT format (pipe-delimited). Description is always loaded."""
         try:
             filepath = self.base_path / filename
             if not filepath.exists():
                 return []
-            
             data = []
             with open(filepath, 'r', encoding='utf-8') as f:
                 for line in f:
                     line = line.strip()
                     if line:
                         values = line.split(delimiter)
-                        if headers:
+                        # Always expect 6 fields: product_id, name, category, quantity, price, description
+                        if len(values) == 6:
+                            item = dict(zip(['product_id', 'name', 'category', 'quantity', 'price', 'description'], values))
+                        elif headers:
                             item = dict(zip(headers, values))
                         else:
                             item = {f'field_{i}': value for i, value in enumerate(values)}
                         data.append(item)
-            
             return data
         except Exception as e:
             print(f"Error loading TXT: {e}")

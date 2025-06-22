@@ -1,0 +1,30 @@
+ELEC-0001|LED TV 42"|Television|product|350.00|15|pcs|42-inch Full HD LED TV
+ELEC-0002|Smartphone X100|Mobile Phones|product|599.00|25|pcs|6.5" Android smartphone, 128GB
+ELEC-0003|Bluetooth Speaker|Audio|product|45.00|30|pcs|Portable Bluetooth speaker, waterproof
+ELEC-0004|Wireless Earbuds|Audio|product|60.00|40|pair|Noise-cancelling wireless earbuds
+ELEC-0005|Laptop Pro 15|Computers|product|950.00|10|pcs|15-inch laptop, 16GB RAM, 512GB SSD
+ELEC-0006|Gaming Mouse|Accessories|product|35.00|50|pcs|RGB gaming mouse, 7 buttons
+ELEC-0007|Mechanical Keyboard|Accessories|product|80.00|20|pcs|Backlit mechanical keyboard
+ELEC-0008|Smartwatch S2|Wearables|product|120.00|18|pcs|Fitness tracking smartwatch
+ELEC-0009|Tablet 10"|Tablets|product|220.00|22|pcs|10-inch Android tablet, 64GB
+ELEC-0010|Action Camera|Cameras|product|150.00|12|pcs|4K waterproof action camera
+ELEC-0011|DSLR Camera|Cameras|product|650.00|8|pcs|24MP DSLR with 18-55mm lens
+ELEC-0012|Power Bank 20000mAh|Accessories|product|30.00|35|pcs|High-capacity power bank
+ELEC-0013|USB Flash Drive 64GB|Accessories|product|12.00|60|pcs|64GB USB 3.0 flash drive
+ELEC-0014|External HDD 1TB|Storage|product|65.00|14|pcs|1TB external hard drive
+ELEC-0015|WiFi Router|Networking|product|55.00|20|pcs|Dual-band wireless router
+ELEC-0016|Smart Home Hub|Smart Home|product|90.00|10|pcs|Voice-controlled smart home hub
+ELEC-0017|Security Camera|Smart Home|product|70.00|16|pcs|WiFi security camera, night vision
+ELEC-0018|Electric Kettle|Appliances|product|28.00|25|pcs|1.7L electric kettle, auto shut-off
+ELEC-0019|Air Fryer|Appliances|product|85.00|13|pcs|3.5L digital air fryer
+ELEC-0020|Microwave Oven|Appliances|product|120.00|9|pcs|20L microwave oven, digital controls
+ELEC-0021|Bluetooth Headphones|Audio|product|55.00|28|pcs|Over-ear Bluetooth headphones
+ELEC-0022|Fitness Tracker|Wearables|product|40.00|32|pcs|Waterproof fitness tracker band
+ELEC-0023|Smart Light Bulb|Smart Home|product|18.00|50|pcs|WiFi LED smart bulb, color changing
+ELEC-0024|VR Headset|Gaming|product|210.00|7|pcs|Virtual reality headset, 3D support
+ELEC-0025|Portable Projector|Audio/Video|product|130.00|11|pcs|Mini portable projector, HDMI
+ELEC-0026|Car Dash Cam|Cameras|product|60.00|19|pcs|Full HD car dash camera
+ELEC-0027|Wireless Charger|Accessories|product|22.00|40|pcs|Qi wireless charging pad
+ELEC-0028|Smart Plug|Smart Home|product|15.00|45|pcs|WiFi smart plug, app control
+ELEC-0029|Robot Vacuum|Appliances|product|180.00|6|pcs|Smart robot vacuum cleaner
+ELEC-0030|Electric Toothbrush|Personal Care|product|35.00|30|pcs|Rechargeable electric toothbrush 
