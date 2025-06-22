@@ -103,4 +103,45 @@ class InventoryManager:
             return False
 
     def get_all_products(self) -> List[Product]:
-        return self.products 
+        return self.products
+
+    def load_from_csv(self, filepath: str) -> bool:
+        try:
+            import csv
+            if not os.path.exists(filepath):
+                return False
+            with open(filepath, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                self.products = []
+                for row in reader:
+                    self.products.append(Product(
+                        product_id=row.get('product_id', ''),
+                        name=row.get('name', ''),
+                        category=row.get('category', ''),
+                        quantity=int(row.get('quantity', 0)),
+                        price=float(row.get('price', 0.0)),
+                        description=row.get('description', '')
+                    ))
+            return True
+        except Exception as e:
+            print(f"Error loading from CSV: {e}")
+            return False
+
+    def load_from_yaml(self, filepath: str) -> bool:
+        try:
+            import yaml
+            if not os.path.exists(filepath):
+                return False
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = yaml.safe_load(f)
+                self.products = [Product.from_dict(item) for item in data]
+            return True
+        except Exception as e:
+            print(f"Error loading from YAML: {e}")
+            return False
+
+    def get_product_by_id(self, product_id: str):
+        for product in self.products:
+            if product.product_id == product_id:
+                return product
+        return None 

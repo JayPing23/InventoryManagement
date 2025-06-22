@@ -1,0 +1,15 @@
+[
+{"product_id": "MIX-0001", "name": "LED TV 42\"", "category": "Electronics", "type": "product", "price": 350.00, "quantity": 15, "unit": "pcs", "description": "42-inch Full HD LED TV", "category_main": "Electronics", "category_sub": ""},
+{"product_id": "MIX-0002", "name": "Smartphone X100", "category": "Electronics", "type": "product", "price": 599.00, "quantity": 25, "unit": "pcs", "description": "6.5\" Android smartphone, 128GB", "category_main": "Electronics", "category_sub": ""},
+{"product_id": "MIX-0004", "name": "Laptop Pro 15", "category": "Electronics", "type": "product", "price": 950.00, "quantity": 10, "unit": "pcs", "description": "15-inch laptop, 16GB RAM, 512GB SSD", "category_main": "Electronics", "category_sub": ""},
+{"product_id": "MIX-0006", "name": "Jeans", "category": "Clothing", "type": "product", "price": 25.00, "quantity": 50, "unit": "pair", "description": "Blue denim jeans", "category_main": "Clothing", "category_sub": ""},
+{"product_id": "MIX-0007", "name": "T-shirt", "category": "Clothing", "type": "product", "price": 10.00, "quantity": 80, "unit": "pcs", "description": "Cotton t-shirt", "category_main": "Clothing", "category_sub": ""},
+{"product_id": "MIX-0009", "name": "Shoe Sale", "category": "Clothing", "type": "product", "price": 30.00, "quantity": 40, "unit": "pair", "description": "Running shoes", "category_main": "Clothing", "category_sub": ""},
+{"product_id": "MIX-0012", "name": "Coffee Beans", "category": "Cafe", "type": "product", "price": 12.00, "quantity": 30, "unit": "kg", "description": "Premium coffee beans", "category_main": "Cafe", "category_sub": ""},
+{"product_id": "MIX-0025", "name": "Wine Bottle", "category": "Beverages", "type": "product", "price": 15.00, "quantity": 25, "unit": "bottle", "description": "Red wine bottle 750ml", "category_main": "Beverages", "category_sub": ""},
+{"product_id": "MIX-0026", "name": "Espresso Shot", "category": "Cafe", "type": "product", "price": 1.50, "quantity": 40, "unit": "cup", "description": "Single espresso shot", "category_main": "Cafe", "category_sub": ""},
+{"product_id": "MIX-0027", "name": "Soup of the Day", "category": "Restaurant", "type": "product", "price": 3.00, "quantity": 18, "unit": "bowl", "description": "Chef's special soup", "category_main": "Restaurant", "category_sub": ""},
+{"product_id": "MIX-0028", "name": "Fruit Tart", "category": "Bakery", "type": "product", "price": 3.50, "quantity": 16, "unit": "pcs", "description": "Fresh fruit tart", "category_main": "Bakery", "category_sub": ""},
+{"product_id": "MIX-0029", "name": "Bagel with Cream Cheese", "category": "Bakery", "type": "product", "price": 2.50, "quantity": 14, "unit": "pcs", "description": "Bagel with cream cheese", "category_main": "Bakery", "category_sub": ""},
+{"product_id": "MIX-0030", "name": "Chicken Wrap", "category": "Restaurant", "type": "product", "price": 5.00, "quantity": 20, "unit": "pcs", "description": "Grilled chicken wrap", "category_main": "Restaurant", "category_sub": ""}
+] 

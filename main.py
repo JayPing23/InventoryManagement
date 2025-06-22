@@ -10,7 +10,7 @@ The UI is designed to be sleek and modern, using a tabbed interface to keep
 controls organized and compact, while maximizing space for the inventory table.
 """
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, colorchooser
 import json
 import os
 from datetime import datetime
@@ -33,6 +33,77 @@ COLORS = {
     'dark': '#1e293b',                                    # Dark text
     'white': '#ffffff',                                   # Card background
     'border': '#e2e8f0'                                   # Border for cards
+}
+
+# --- Two-Level Category Tree ---
+CATEGORY_TREE = {
+    # Main categories as keys, each with a list of subcategories
+    "Raw Materials": ["Metals", "Plastics", "Chemicals", "Other"],
+    "Components": ["Electronics", "Mechanical", "Optical", "Other"],
+    "Finished Goods": ["Electronics", "Furniture", "Apparel", "Other"],
+    "Consumables": ["Food", "Beverage", "Office Supplies", "Other"],
+    "Perishables": ["Produce", "Dairy", "Meat", "Other"],
+    "Equipment": ["IT", "Manufacturing", "Office", "Other"],
+    "Supplies": ["Cleaning", "Packaging", "Safety", "Other"],
+    "Packaging": ["Boxes", "Bottles", "Wrapping", "Other"],
+    "Service": ["Repair", "Installation", "Delivery", "Consulting", "Other"],
+    "Digital": ["Software", "eBook", "Media", "License", "Other"],
+    "Subscription": ["SaaS", "Maintenance", "Membership", "Other"],
+    "Booking": ["Event", "Rental", "Appointment", "Other"],
+    "Training": ["Staff", "Customer", "Other"],
+    "Maintenance": ["Equipment", "IT", "Other"],
+    "Other": ["Other"]
+}
+
+# File where user-defined custom categories are stored
+CUSTOM_CATEGORIES_FILE = os.path.join('datas', 'custom_categories.json')
+
+# On startup, load custom categories and merge with CATEGORY_TREE
+# This allows users to extend the category system without losing defaults
+
+def load_custom_categories():
+    # Loads user-defined categories from a JSON file if it exists
+    if os.path.exists(CUSTOM_CATEGORIES_FILE):
+        with open(CUSTOM_CATEGORIES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_custom_categories(custom_tree):
+    # Saves the current custom category tree to disk
+    with open(CUSTOM_CATEGORIES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(custom_tree, f, indent=2)
+
+# Merge default and custom trees
+def get_full_category_tree():
+    # Start with a copy of the default tree
+    tree = {k: v[:] for k, v in CATEGORY_TREE.items()}
+    custom = load_custom_categories()
+    for main, subs in custom.items():
+        if main not in tree:
+            tree[main] = []
+        for sub in subs:
+            if sub not in tree[main]:
+                tree[main].append(sub)
+    return tree
+
+CATEGORY_TREE = get_full_category_tree()
+
+CATEGORY_DEFAULTS = {
+    "Raw Materials": {"icon": "🪨", "color": "#8D5524"},
+    "Components": {"icon": "🧩", "color": "#3B83BD"},
+    "Finished Goods": {"icon": "📦", "color": "#F4A300"},
+    "Consumables": {"icon": "🍎", "color": "#A3C644"},
+    "Perishables": {"icon": "🥦", "color": "#6FCF97"},
+    "Equipment": {"icon": "🛠️", "color": "#B5651D"},
+    "Supplies": {"icon": "📑", "color": "#E67E22"},
+    "Packaging": {"icon": "🎁", "color": "#E84393"},
+    "Service": {"icon": "🛎️", "color": "#00B894"},
+    "Digital": {"icon": "💾", "color": "#636EFA"},
+    "Subscription": {"icon": "🔄", "color": "#00B8D9"},
+    "Booking": {"icon": "📅", "color": "#FDCB6E"},
+    "Training": {"icon": "🎓", "color": "#6D214F"},
+    "Maintenance": {"icon": "🧰", "color": "#636E72"},
+    "Other": {"icon": "🗂️", "color": "#B2BEC3"}
 }
 
 class ModernButton(ttk.Button):
@@ -70,7 +141,7 @@ class EditItemDialog:
         self.dialog.geometry("+%d+%d" % (parent.winfo_rootx() + 50, parent.winfo_rooty() + 50))
         
         self.item_data = item_data
-        self.categories = categories
+        self.categories = categories if categories else list(CATEGORY_TREE.keys())
         self.result = None  # Stores the edited data if the user saves.
         
         self.create_widgets()
@@ -96,22 +167,30 @@ class EditItemDialog:
         self.quantity_entry.grid(row=2, column=1, padx=(15, 0), pady=8, sticky=tk.W)
         self.quantity_entry.insert(0, str(self.item_data['quantity'])) # Pre-fill
 
-        # Category
-        UIUtils.create_styled_label(main_frame, "Category:").grid(row=3, column=0, sticky=tk.W, pady=8)
-        self.category_combo = ttk.Combobox(main_frame, values=self.categories, width=32, state="readonly", font=("Segoe UI", 10))
-        self.category_combo.grid(row=3, column=1, padx=(15, 0), pady=8, sticky=tk.W)
-        self.category_combo.set(self.item_data['category']) # Pre-fill
+        # Main Category
+        UIUtils.create_styled_label(main_frame, "Main Category:").grid(row=3, column=0, sticky=tk.W, pady=8)
+        # Dropdown for main category, populated from CATEGORY_TREE keys
+        self.main_category_combo = ttk.Combobox(main_frame, values=list(CATEGORY_TREE.keys()), width=32, state="normal", font=("Segoe UI", 10))
+        self.main_category_combo.grid(row=3, column=1, padx=(15, 0), pady=8, sticky=tk.W)
+        self.main_category_combo.set(self.item_data['category_main']) # Pre-fill
+
+        # Sub Category
+        UIUtils.create_styled_label(main_frame, "Sub Category:").grid(row=4, column=0, sticky=tk.W, pady=8)
+        # Dropdown for subcategory, dynamically populated based on main category
+        self.sub_category_combo = ttk.Combobox(main_frame, values=CATEGORY_TREE.get(self.item_data['category_main'], []), width=32, state="normal", font=("Segoe UI", 10))
+        self.sub_category_combo.grid(row=4, column=1, padx=(15, 0), pady=8, sticky=tk.W)
+        self.sub_category_combo.set(self.item_data['category_sub']) # Pre-fill
 
         # Description
         description_label = ttk.Label(main_frame, text="Description:")
-        description_label.grid(row=4, column=0, sticky=tk.W, pady=8)
+        description_label.grid(row=5, column=0, sticky=tk.W, pady=8)
         self.description_entry = ttk.Entry(main_frame, width=35)
-        self.description_entry.grid(row=4, column=1, padx=(15, 0), pady=8, sticky=tk.W)
+        self.description_entry.grid(row=5, column=1, padx=(15, 0), pady=8, sticky=tk.W)
         self.description_entry.insert(0, self.item_data.get('description', ''))
 
         # --- Action Buttons ---
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=5, column=0, columnspan=2, pady=(30, 0))
+        button_frame.grid(row=6, column=0, columnspan=2, pady=(30, 0))
 
         save_button = UIUtils.create_styled_button(button_frame, "💾 Save Changes", self.save_changes, 'success')
         save_button.pack(side=tk.LEFT, padx=(0, 15))
@@ -128,11 +207,12 @@ class EditItemDialog:
         # Retrieve and strip whitespace from inputs.
         name = self.name_entry.get().strip()
         quantity_str = self.quantity_entry.get().strip()
-        category = self.category_combo.get()
+        main_category = self.main_category_combo.get()
+        sub_category = self.sub_category_combo.get()
         description = self.description_entry.get().strip()
         
         # Basic validation.
-        if not name or not quantity_str or not category:
+        if not name or not quantity_str or not main_category:
             UIUtils.show_message("Error", "All fields are required.", 'error')
             return
             
@@ -144,8 +224,13 @@ class EditItemDialog:
             UIUtils.show_message("Error", "Quantity must be a positive integer.", 'error')
             return
             
+        # Add new category to the session list if not present
+        if main_category and main_category not in self.categories:
+            self.categories.append(main_category)
+            self.main_category_combo['values'] = self.categories
+        
         # If validation passes, store the result.
-        self.result = {'name': name, 'quantity': quantity, 'category': category, 'description': description}
+        self.result = {'name': name, 'quantity': quantity, 'category_main': main_category, 'category_sub': sub_category, 'description': description}
         self.dialog.destroy() # Close the dialog.
         
     def cancel(self):
@@ -180,18 +265,6 @@ class InventoryApp:
         self.setup_styles()
         self.current_file = None # To track the path of the currently loaded file.
         
-        # A comprehensive list of categories for consistency.
-        self.categories = [
-            "Electronics", "Clothing & Apparel", "Books & Media", "Home & Garden", 
-            "Sports & Recreation", "Automotive", "Health & Beauty", "Food & Beverages", 
-            "Office Supplies", "Tools & Hardware", "Toys & Games", "Jewelry & Accessories", 
-            "Pet Supplies", "Baby & Kids", "Art & Crafts", "Musical Instruments", 
-            "Outdoor & Camping", "Kitchen & Dining", "Bathroom & Personal Care", "Bedroom & Furniture", 
-            "Lighting & Electrical", "Plumbing & Fixtures", "Building Materials", "Garden & Landscaping", 
-            "Cleaning Supplies", "Medical & First Aid", "Safety Equipment", "Storage & Organization", 
-            "Seasonal Items", "Collectibles", "Antiques", "Vintage Items", "Handmade Items", 
-            "Digital Products", "Services", "Other"
-        ]
         self.create_widgets()
 
     def setup_styles(self):
@@ -270,8 +343,9 @@ class InventoryApp:
         table_frame.pack(fill=tk.BOTH, expand=True, pady=(2, 0))
         columns = ("ID", "Name", "Category", "Quantity", "Price", "Description")
         self.tree = ttk.Treeview(table_frame, columns=columns, show='headings', height=18)
+        self._sort_orders = {col: False for col in columns}
         for col in columns:
-            self.tree.heading(col, text=col)
+            self.tree.heading(col, text=col, command=lambda c=col: self.sort_by_column(c))
             self.tree.column(col, width=100 if col != "Description" else 180, anchor='center')
         self.tree.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
         self.tree.bind('<Double-1>', self.on_double_click)
@@ -291,14 +365,17 @@ class InventoryApp:
         UIUtils.create_styled_label(input_frame, "Price:").grid(row=2, column=0, sticky=tk.W, pady=2)
         self.price_entry = UIUtils.create_styled_entry(input_frame, placeholder="Enter price", width=10)
         self.price_entry.grid(row=2, column=1, padx=(5, 0), pady=2, sticky=tk.W)
-        UIUtils.create_styled_label(input_frame, "Category:").grid(row=3, column=0, sticky=tk.W, pady=2)
-        self.category_combo = ttk.Combobox(input_frame, values=self.categories, width=18, state="readonly", font=("Segoe UI", 9))
-        self.category_combo.grid(row=3, column=1, padx=(5, 0), pady=2, sticky=tk.W)
+        UIUtils.create_styled_label(input_frame, "Main Category:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        self.main_category_combo = ttk.Combobox(input_frame, values=list(CATEGORY_TREE.keys()), width=18, state="normal", font=("Segoe UI", 9))
+        self.main_category_combo.grid(row=3, column=1, padx=(5, 0), pady=2, sticky=tk.W)
+        UIUtils.create_styled_label(input_frame, "Sub Category:").grid(row=4, column=0, sticky=tk.W, pady=2)
+        self.sub_category_combo = ttk.Combobox(input_frame, values=CATEGORY_TREE.get(self.main_category_combo.get(), []), width=18, state="normal", font=("Segoe UI", 9))
+        self.sub_category_combo.grid(row=4, column=1, padx=(5, 0), pady=2, sticky=tk.W)
         # Add description label and entry
         description_label = ttk.Label(input_frame, text="Description:")
-        description_label.grid(row=4, column=0, padx=5, pady=5, sticky='e')
+        description_label.grid(row=5, column=0, padx=5, pady=5, sticky='e')
         self.description_entry = ttk.Entry(input_frame)
-        self.description_entry.grid(row=4, column=1, padx=5, pady=5, sticky='w')
+        self.description_entry.grid(row=5, column=1, padx=5, pady=5, sticky='w')
         add_button = UIUtils.create_styled_button(add_frame, "Add Item", self.add_item, 'success')
         add_button.pack(pady=5)
 
@@ -311,11 +388,16 @@ class InventoryApp:
         self.search_entry = UIUtils.create_styled_entry(search_controls, placeholder="Search items...", width=18)
         self.search_entry.grid(row=0, column=1, padx=(5, 5), pady=2, sticky=tk.W)
         self.search_entry.bind('<KeyRelease>', self.filter_items)
-        UIUtils.create_styled_label(search_controls, "Category:").grid(row=0, column=2, sticky=tk.W, pady=2)
-        self.filter_category = ttk.Combobox(search_controls, values=['All'] + self.categories, width=15, state="readonly", font=("Segoe UI", 9))
-        self.filter_category.grid(row=0, column=3, padx=(5, 0), pady=2, sticky=tk.W)
-        self.filter_category.set('All')
-        self.filter_category.bind('<<ComboboxSelected>>', self.filter_items)
+        UIUtils.create_styled_label(search_controls, "Main Category:").grid(row=0, column=2, sticky=tk.W, pady=2)
+        self.filter_main_category = ttk.Combobox(search_controls, values=['All'] + list(CATEGORY_TREE.keys()), width=15, state="readonly", font=("Segoe UI", 9))
+        self.filter_main_category.grid(row=0, column=3, padx=(5, 0), pady=2, sticky=tk.W)
+        self.filter_main_category.set('All')
+        self.filter_main_category.bind('<<ComboboxSelected>>', self.filter_items)
+        UIUtils.create_styled_label(search_controls, "Sub Category:").grid(row=0, column=4, sticky=tk.W, pady=2)
+        self.filter_sub_category = ttk.Combobox(search_controls, values=['All'] + list(CATEGORY_TREE.keys()), width=15, state="readonly", font=("Segoe UI", 9))
+        self.filter_sub_category.grid(row=0, column=5, padx=(5, 0), pady=2, sticky=tk.W)
+        self.filter_sub_category.set('All')
+        self.filter_sub_category.bind('<<ComboboxSelected>>', self.filter_items)
         clear_button = UIUtils.create_styled_button(search_frame, "Clear Filters", self.clear_filters, 'secondary')
         clear_button.pack(pady=5)
 
@@ -344,11 +426,12 @@ class InventoryApp:
         name = self.name_entry.get().strip()
         quantity_str = self.quantity_entry.get().strip()
         price_str = self.price_entry.get().strip()
-        category = self.category_combo.get()
+        main_category = self.main_category_combo.get()
+        sub_category = self.sub_category_combo.get()
         description = self.description_entry.get().strip()
 
         # Validation
-        if not name or not quantity_str or not price_str or not category:
+        if not name or not quantity_str or not price_str or not main_category:
             UIUtils.show_message("Error", "All fields are required.", 'error')
             return
 
@@ -364,7 +447,8 @@ class InventoryApp:
         # Create product using the model
         product = Product(
             name=name,
-            category=category,
+            category_main=main_category,
+            category_sub=sub_category,
             price=price,
             quantity=quantity,
             description=description
@@ -387,13 +471,15 @@ class InventoryApp:
         for p in self.inventory_manager.get_all_products():
             total_items += 1
             total_value += (p.price or 0.0) * (p.quantity or 0)
-            self.tree.insert('', 'end', values=(p.product_id, p.name, p.category, p.quantity, p.price, p.description))
+            # Display both main and subcategory in the Category column for clarity
+            self.tree.insert('', 'end', values=(p.product_id, p.name, f"{getattr(p, 'category_main', getattr(p, 'category', 'Uncategorized'))} - {getattr(p, 'category_sub', '')}", p.quantity, p.price, p.description))
         self.summary_label.config(text=f"Total Items: {total_items} | Total Value: ${total_value:.2f}")
 
     def filter_items(self, event=None):
         """Filters the inventory table based on search criteria."""
         search_term = self.search_entry.get().lower()
-        category_filter = self.filter_category.get()
+        main_category_filter = self.filter_main_category.get()
+        sub_category_filter = self.filter_sub_category.get()
 
         # Clear existing items
         for item in self.tree.get_children():
@@ -408,8 +494,12 @@ class InventoryApp:
             if search_term and search_term not in product.name.lower():
                 continue
             
-            # Check category filter
-            if category_filter != 'All' and product.category != category_filter:
+            # Check main category filter (matches category_main, falls back to legacy category if needed)
+            if main_category_filter != 'All' and getattr(product, 'category_main', getattr(product, 'category', 'Uncategorized')) != main_category_filter:
+                continue
+            
+            # Check sub category filter (matches category_sub)
+            if sub_category_filter != 'All' and getattr(product, 'category_sub', '') != sub_category_filter:
                 continue
             
             filtered_products.append(product)
@@ -420,7 +510,7 @@ class InventoryApp:
             self.tree.insert('', 'end', values=(
                 product.product_id,
                 product.name,
-                product.category,
+                f"{getattr(product, 'category_main', getattr(product, 'category', 'Uncategorized'))} - {getattr(product, 'category_sub', '')}",
                 product.quantity,
                 UIUtils.format_currency(product.price),
                 UIUtils.format_currency(total_value),
@@ -430,7 +520,8 @@ class InventoryApp:
     def clear_filters(self):
         """Clears all search and filter criteria."""
         self.search_entry.delete(0, tk.END)
-        self.filter_category.set('All')
+        self.filter_main_category.set('All')
+        self.filter_sub_category.set('All')
         self.update_table()
 
     def clear_entries(self):
@@ -438,13 +529,14 @@ class InventoryApp:
         self.name_entry.delete(0, tk.END)
         self.quantity_entry.delete(0, tk.END)
         self.price_entry.delete(0, tk.END)
-        self.category_combo.set('')
+        self.main_category_combo.set('')
+        self.sub_category_combo.set('')
         self.description_entry.delete(0, tk.END)
 
     def save_inventory(self):
         """Saves the current inventory to the current file."""
         if self.current_file:
-            success = self.inventory_manager.save_to_file(self.current_file)
+            success = self.inventory_manager.save_to_json(self.current_file)
             if success:
                 UIUtils.show_message("Success", "Inventory saved successfully!", 'info')
             else:
@@ -460,7 +552,7 @@ class InventoryApp:
         )
         
         if filename:
-            success = self.inventory_manager.save_to_file(filename)
+            success = self.inventory_manager.save_to_json(filename)
             if success:
                 self.current_file = filename
                 UIUtils.show_message("Success", "Inventory saved successfully!", 'info')
@@ -468,14 +560,29 @@ class InventoryApp:
                 UIUtils.show_message("Error", "Failed to save inventory.", 'error')
 
     def load_inventory(self):
-        """Loads inventory from a file."""
+        """Loads inventory from a file, auto-detecting format."""
         filename = self.file_utils.get_open_filename(
             "Load Inventory",
-            [("JSON files", "*.json"), ("All files", "*.*")]
+            [("All Supported", "*.json *.txt *.csv *.yaml *.yml"),
+             ("JSON files", "*.json"),
+             ("Text files", "*.txt"),
+             ("CSV files", "*.csv"),
+             ("YAML files", "*.yaml;*.yml"),
+             ("All files", "*.*")]
         )
-        
         if filename:
-            success = self.inventory_manager.load_from_file(filename)
+            ext = os.path.splitext(filename)[1].lower()
+            if ext == ".json":
+                success = self.inventory_manager.load_from_json(filename)
+            elif ext == ".txt":
+                success = self.inventory_manager.load_from_txt(filename)
+            elif ext == ".csv":
+                success = self.inventory_manager.load_from_csv(filename)
+            elif ext in (".yaml", ".yml"):
+                success = self.inventory_manager.load_from_yaml(filename)
+            else:
+                UIUtils.show_message("Error", "Unsupported file format.", 'error')
+                return
             if success:
                 self.current_file = filename
                 self.update_table()
@@ -497,7 +604,8 @@ class InventoryApp:
             return {
                 'id': product.product_id,
                 'name': product.name,
-                'category': product.category,
+                'category_main': getattr(product, 'category_main', getattr(product, 'category', 'Uncategorized')),
+                'category_sub': getattr(product, 'category_sub', ''),
                 'quantity': product.quantity,
                 'price': product.price
             }
@@ -511,7 +619,7 @@ class InventoryApp:
 
     def edit_item(self, item_data, item_id):
         """Opens the edit dialog and handles the editing process."""
-        dialog = EditItemDialog(self.root, item_data, self.categories)
+        dialog = EditItemDialog(self.root, item_data, list(CATEGORY_TREE.keys()))
         self.root.wait_window(dialog.dialog)
         
         if dialog.result:
@@ -519,7 +627,8 @@ class InventoryApp:
             product = Product(
                 product_id=item_id,
                 name=dialog.result['name'],
-                category=dialog.result['category'],
+                category_main=dialog.result['category_main'],
+                category_sub=dialog.result['category_sub'],
                 price=item_data['price'],
                 quantity=dialog.result['quantity'],
                 description=dialog.result.get('description', '')
@@ -576,6 +685,60 @@ class InventoryApp:
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export: {e}")
 
+    def sort_by_column(self, col):
+        data = [(self.tree.set(k, col), k) for k in self.tree.get_children('')]
+        # Try to convert to float for numeric columns
+        try:
+            data.sort(key=lambda t: float(t[0]) if t[0] != '' else float('-inf'), reverse=self._sort_orders[col])
+        except ValueError:
+            data.sort(key=lambda t: t[0].lower() if isinstance(t[0], str) else t[0], reverse=self._sort_orders[col])
+        for index, (val, k) in enumerate(data):
+            self.tree.move(k, '', index)
+        self._sort_orders[col] = not self._sort_orders[col]
+
+class CategoryManagerDialog(tk.Toplevel):
+    def __init__(self, parent, category_tree, on_save):
+        super().__init__(parent)
+        self.title('Manage Categories')
+        self.geometry('500x400')
+        self.category_tree = category_tree
+        self.on_save = on_save
+        self.tree = ttk.Treeview(self, columns=('Color', 'Icon'))
+        self.tree.heading('#0', text='Main Category')
+        self.tree.heading('Color', text='Color')
+        self.tree.heading('Icon', text='Icon')
+        self.tree.pack(fill='both', expand=True, padx=10, pady=10)
+        self.populate_tree()
+        btn_frame = ttk.Frame(self)
+        btn_frame.pack(fill='x', pady=5)
+        ttk.Button(btn_frame, text='Add Main', command=self.add_main).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text='Add Sub', command=self.add_sub).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text='Rename', command=self.rename_cat).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text='Delete', command=self.delete_cat).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text='Set Color', command=self.set_color).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text='Set Icon', command=self.set_icon).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text='Save', command=self.save).pack(side='right', padx=5)
+    def populate_tree(self):
+        self.tree.delete(*self.tree.get_children())
+        for main, subs in self.category_tree.items():
+            main_id = self.tree.insert('', 'end', text=main, values=(self.get_color(main), self.get_icon(main)))
+            for sub in subs:
+                self.tree.insert(main_id, 'end', text=sub, values=(self.get_color(main, sub), self.get_icon(main, sub)))
+    def get_color(self, main, sub=None):
+        # Placeholder: return color from category data
+        return ''
+    def get_icon(self, main, sub=None):
+        # Placeholder: return icon from category data
+        return ''
+    def add_main(self): pass
+    def add_sub(self): pass
+    def rename_cat(self): pass
+    def delete_cat(self): pass
+    def set_color(self): pass
+    def set_icon(self): pass
+    def save(self):
+        self.on_save(self.category_tree)
+        self.destroy()
 
 def main():
     """Main function to run the application."""
