@@ -1,0 +1,187 @@
+[
+    {
+        "name": "Laptop Dell XPS 13",
+        "quantity": 5,
+        "category": "Electronics"
+    },
+    {
+        "name": "Wireless Mouse Logitech",
+        "quantity": 12,
+        "category": "Electronics"
+    },
+    {
+        "name": "Office Chair Ergonomic",
+        "quantity": 8,
+        "category": "Office Supplies"
+    },
+    {
+        "name": "Notebook A4 Size",
+        "quantity": 50,
+        "category": "Office Supplies"
+    },
+    {
+        "name": "Coffee Maker Bunn",
+        "quantity": 3,
+        "category": "Kitchen & Dining"
+    },
+    {
+        "name": "Coffee Beans Premium",
+        "quantity": 25,
+        "category": "Food & Beverages"
+    },
+    {
+        "name": "Safety Goggles",
+        "quantity": 15,
+        "category": "Safety Equipment"
+    },
+    {
+        "name": "First Aid Kit",
+        "quantity": 6,
+        "category": "Medical & First Aid"
+    },
+    {
+        "name": "Garden Hose 50ft",
+        "quantity": 4,
+        "category": "Garden & Landscaping"
+    },
+    {
+        "name": "Printer Paper 500 sheets",
+        "quantity": 20,
+        "category": "Office Supplies"
+    },
+    {
+        "name": "LED Desk Lamp",
+        "quantity": 10,
+        "category": "Lighting & Electrical"
+    },
+    {
+        "name": "USB-C Cable",
+        "quantity": 30,
+        "category": "Electronics"
+    },
+    {
+        "name": "Hand Sanitizer 500ml",
+        "quantity": 18,
+        "category": "Health & Beauty"
+    },
+    {
+        "name": "Storage Box Large",
+        "quantity": 12,
+        "category": "Storage & Organization"
+    },
+    {
+        "name": "Screwdriver Set",
+        "quantity": 7,
+        "category": "Tools & Hardware"
+    },
+    {
+        "name": "Yoga Mat",
+        "quantity": 9,
+        "category": "Sports & Recreation"
+    },
+    {
+        "name": "Dog Food Premium",
+        "quantity": 14,
+        "category": "Pet Supplies"
+    },
+    {
+        "name": "Baby Diapers Size 3",
+        "quantity": 22,
+        "category": "Baby & Kids"
+    },
+    {
+        "name": "Paint Brushes Set",
+        "quantity": 11,
+        "category": "Art & Crafts"
+    },
+    {
+        "name": "Guitar Acoustic",
+        "quantity": 2,
+        "category": "Musical Instruments"
+    },
+    {
+        "name": "Tent 4-Person",
+        "quantity": 3,
+        "category": "Outdoor & Camping"
+    },
+    {
+        "name": "Blender KitchenAid",
+        "quantity": 4,
+        "category": "Kitchen & Dining"
+    },
+    {
+        "name": "Towels Bath Set",
+        "quantity": 16,
+        "category": "Bathroom & Personal Care"
+    },
+    {
+        "name": "Bedside Table",
+        "quantity": 6,
+        "category": "Bedroom & Furniture"
+    },
+    {
+        "name": "Ceiling Fan",
+        "quantity": 3,
+        "category": "Lighting & Electrical"
+    },
+    {
+        "name": "PVC Pipe 2-inch",
+        "quantity": 25,
+        "category": "Plumbing & Fixtures"
+    },
+    {
+        "name": "Cement Bags 50lb",
+        "quantity": 8,
+        "category": "Building Materials"
+    },
+    {
+        "name": "Garden Soil 40lb",
+        "quantity": 12,
+        "category": "Garden & Landscaping"
+    },
+    {
+        "name": "All-Purpose Cleaner",
+        "quantity": 20,
+        "category": "Cleaning Supplies"
+    },
+    {
+        "name": "Bandages Assorted",
+        "quantity": 35,
+        "category": "Medical & First Aid"
+    },
+    {
+        "name": "Hard Hat",
+        "quantity": 10,
+        "category": "Safety Equipment"
+    },
+    {
+        "name": "File Cabinet 2-Drawer",
+        "quantity": 5,
+        "category": "Storage & Organization"
+    },
+    {
+        "name": "Christmas Lights LED",
+        "quantity": 8,
+        "category": "Seasonal Items"
+    },
+    {
+        "name": "Vintage Clock",
+        "quantity": 1,
+        "category": "Antiques"
+    },
+    {
+        "name": "Handmade Soap",
+        "quantity": 15,
+        "category": "Handmade Items"
+    },
+    {
+        "name": "Digital Course Access",
+        "quantity": 100,
+        "category": "Digital Products"
+    },
+    {
+        "name": "Consultation Service",
+        "quantity": 50,
+        "category": "Services"
+    }
+] 
